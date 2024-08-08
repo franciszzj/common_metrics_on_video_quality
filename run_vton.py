@@ -55,8 +55,8 @@ if __name__ == "__main__":
     gen_img = torch.stack(gen_img_list)
 
     if gen_img.shape[-1] != ori_img.shape[-1] or gen_img.shape[-2] != ori_img.shape[-2]:
-        gen_img = torch.nn.functional.interpolate(gen_img, size=(
-            ori_img.shape[-2], ori_img.shape[-1]), mode="bilinear", align_corners=False)
+        ori_img = torch.nn.functional.interpolate(ori_img, size=(
+            gen_img.shape[-2], gen_img.shape[-1]), mode="bilinear", align_corners=False)
 
     ori_img = ori_img.unsqueeze(1)
     gen_img = gen_img.unsqueeze(1)
