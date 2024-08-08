@@ -12,10 +12,12 @@ from calculate_lpips import calculate_lpips
 
 # ps: pixel value should be in [0, 1]!
 
+
 def calculate_fid(hr_path, sr_path):
     return fid_score.calculate_fid_given_paths(
         [hr_path, sr_path], batch_size=1, device="cuda", dims=2048, num_workers=4
     )
+
 
 def read_dir(dir_path, exts=[".png", ".jpg", ".jpeg"], sort=True):
     files = []
@@ -24,6 +26,7 @@ def read_dir(dir_path, exts=[".png", ".jpg", ".jpeg"], sort=True):
     if sort:
         files = sorted(files)
     return files
+
 
 if __name__ == "__main__":
     ori_dir = sys.argv[1]
@@ -48,8 +51,15 @@ if __name__ == "__main__":
         ori_img_list.append(ori_img)
         gen_img_list.append(gen_img)
 
-    ori_img = torch.stack(ori_img_list).unsqueeze(1)
-    gen_img = torch.stack(gen_img_list).unsqueeze(1)
+    ori_img = torch.stack(ori_img_list)
+    gen_img = torch.stack(gen_img_list)
+
+    if gen_img.shape[-1] != ori_img.shape[-1] or gen_img.shape[-2] != ori_img.shape[-2]:
+        gen_img = torch.nn.functional.interpolate(gen_img, size=(
+            ori_img.shape[-2], ori_img.shape[-1]), mode="bilinear", align_corners=False)
+
+    ori_img = ori_img.unsqueeze(1)
+    gen_img = gen_img.unsqueeze(1)
 
     avg_psnr = calculate_psnr(ori_img, gen_img)
     print("PSNR: ", avg_psnr)
